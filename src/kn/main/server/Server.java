@@ -40,6 +40,7 @@ class Server {
 
 	// store dj and followers' info
 	public static HashMap<Integer, LinkedList<Integer>> djFollowersMap = null;
+	// store uin Socket
 	public static HashMap<Integer, Socket> uinSocketMap = null;
 
 
