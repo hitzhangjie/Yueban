@@ -43,7 +43,6 @@ class Server {
 	// store uin Socket test
 	public static HashMap<Integer, Socket> uinSocketMap = null;
 
-
 	// lock
 	public static String LOCK = "MUTEX";
 	public ArrayList<ServerHandleAppEventThread> handleAppEventThreadLists = null;
@@ -58,7 +57,6 @@ class Server {
 		server.run();
 	}
 
-	// server entry
 	public void run() {
 
 		try {
