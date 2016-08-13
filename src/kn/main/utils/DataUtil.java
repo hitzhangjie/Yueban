@@ -1,9 +1,6 @@
 package kn.main.utils;
 
-import com.sun.media.jfxmedia.control.VideoRenderControl;
 import kn.main.common.EventType;
-
-import javax.swing.event.DocumentEvent;
 
 /**
  * Created by zhangjie on 8/13/16.
@@ -77,4 +74,5 @@ class DJEventMsg {
 	public void setDj_follower_uid(int dj_follower_uid) {
 		this.dj_follower_uid = dj_follower_uid;
 	}
+
 }
