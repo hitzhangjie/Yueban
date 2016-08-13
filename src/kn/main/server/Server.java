@@ -28,7 +28,7 @@ import java.util.*;
  * README.md in details.
  *
  */
-class Server {
+public class Server {
 
 	public ServerSocket listen_socket = null;
 
@@ -46,6 +46,7 @@ class Server {
 
 	// lock
 	public static String LOCK = "MUTEX";
+	public static final String LOCK_DJ = "MUTEX_DJ";
 	public ArrayList<ServerHandleAppEventThread> handleAppEventThreadLists = null;
 	public ServerCleanClientThread cleanClientThread = null;
 
