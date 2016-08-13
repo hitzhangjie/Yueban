@@ -44,7 +44,7 @@ public class Server {
 	public static HashMap<Integer, Socket> uinSocketMap = null;
 
 	// lock
-	public static String LOCK = "MUTEX";
+	public static final String LOCK = "MUTEX";
 	public static final String LOCK_DJ = "MUTEX_DJ";
 	public ArrayList<ServerHandleAppEventThread> handleAppEventThreadLists = null;
 	public ServerCleanClientThread cleanClientThread = null;
@@ -65,10 +65,10 @@ public class Server {
 			listen_socket = new ServerSocket(PORT);
 			Socket conn_socket = null;
 
-			System.out.println("Server is listening ...");
-
 			// 主线程只负责建立连接，并维护客户端的连接信息
 			while((conn_socket=listen_socket.accept())!=null) {
+
+				System.out.println("A new Connection is established");
 
 				if(clientsList==null) {
 					clientsList = new ArrayList<SocketAddress>();
@@ -93,11 +93,12 @@ public class Server {
 				handleAppEventThread.start();
 
 				// clean offline clients
-				if(cleanClientThread.isAlive())
+				if(!cleanClientThread.isAlive())
 					cleanClientThread.start();
 
-				Thread.sleep(1000);
 				System.out.println("Server is listening ... waiting to be connected");
+
+				Thread.sleep(1000);
 			}
 		}
 		catch (Exception e) {

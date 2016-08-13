@@ -33,13 +33,14 @@ public class DataUtil {
 	 */
 	public static Object decodeAsMsg(String rawData) throws Exception {
 
+		System.out.println("get value:"+rawData);
+
 		if(rawData==null) {
 			throw new Exception("you're decoding invalid data ... check and try again");
 		}
 
 		Object res = null;
 		String evtType_s = String.valueOf(rawData.charAt(0))+String.valueOf(rawData.charAt(1));
-		System.out.println("value:"+evtType_s);
 		Integer evtType_i = null;
 		try {
 			evtType_i = Integer.parseInt(evtType_s);
