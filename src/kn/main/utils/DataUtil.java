@@ -6,8 +6,6 @@ package kn.main.utils;
 import kn.main.common.EventType;
 import kn.main.server.msg_type.*;
 
-import javax.swing.event.DocumentEvent;
-
 /**
  * Created by zhangjie on 8/13/16.
  */
@@ -124,6 +122,7 @@ public class DataUtil {
 
 		return msg;
 	}
+
 }
 
 

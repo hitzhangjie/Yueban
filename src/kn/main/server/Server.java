@@ -45,6 +45,7 @@ public class Server {
 
 	// lock
 	public static String LOCK = "MUTEX";
+	public static final String LOCK_DJ = "MUTEX_DJ";
 	public ArrayList<ServerHandleAppEventThread> handleAppEventThreadLists = null;
 	public ServerCleanClientThread cleanClientThread = null;
 
