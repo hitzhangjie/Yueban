@@ -36,4 +36,8 @@ public class EventType {
 
 	// 歌单创建相关的事件
 	// ...
+
+
+	//
+	public static final int HEARTBEAT_EVENT = 99;
 }

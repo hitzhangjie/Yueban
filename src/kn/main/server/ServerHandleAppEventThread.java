@@ -1,6 +1,8 @@
 package kn.main.server;
 
+import kn.main.server.event_type.HandleHeartbeatEvent;
 import kn.main.server.msg_type.DJEventMsg;
+import kn.main.server.msg_type.HeartbeatMsg;
 import kn.main.server.msg_type.InteractEventMsg;
 import kn.main.server.msg_type.MusicCtrlEventMsg;
 import kn.main.utils.DataUtil;
@@ -155,8 +157,8 @@ class ServerHandleAppEventThread extends Thread {
 				//while(in.read(buf)>=0)
 				//while(in.read(buf)>0) {
 				in.read(buf);
-
 				String rawData = buf.toString();
+
 				Object obj = DataUtil.decodeAsMsg(rawData);
 				if(obj instanceof DJEventMsg) {
 					DJEventMsg msg = (DJEventMsg)obj;
@@ -170,14 +172,20 @@ class ServerHandleAppEventThread extends Thread {
 					InteractEventMsg msg = (InteractEventMsg)obj;
 					// call your event handler function
 				}
+				else if(obj instanceof HeartbeatMsg) {
+					// call following handler function
+					HeartbeatMsg msg = (HeartbeatMsg)obj;
+					HandleHeartbeatEvent.handleEvent(msg, connSocket);
+				}
 				else {
 					// common events
 					// call your event handler function
 				}
 
-				heartbeat += new String(buf);
+				//heartbeat += new String(buf);
 				//}
 
+				/*
 				// ack heartbeat
 				String msg = "Server Side Thread "+Thread.currentThread().getId()
 						+" ACK your heartbeat: \""+heartbeat+"\"";
@@ -198,6 +206,7 @@ class ServerHandleAppEventThread extends Thread {
 				write(msg, out);
 				msg = "["+new Date().toString()+"] CLIENTSADDR:"+msg;
 				System.out.println(msg);
+				*/
 
 				Thread.sleep(1000);
 			}
@@ -205,6 +214,5 @@ class ServerHandleAppEventThread extends Thread {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 }

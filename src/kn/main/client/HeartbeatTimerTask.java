@@ -1,5 +1,7 @@
 package kn.main.client;
 
+import kn.main.common.EventType;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -40,11 +42,19 @@ class HeartbeatTimerTask extends Thread {
 
 			while(!connSocket.isClosed()) {
 
-				byte [] heartbeat = ("["+new Date().toString()+"] hello server, I am a client").getBytes();
+				String event = String.valueOf(EventType.HEARTBEAT_EVENT);
+				String end_flag = "@@";
+				String dtime = new Date().toString();
+				byte [] heartbeat = (event + "["+dtime+"] hello server!" + end_flag).getBytes();
 				byte [] response = new byte[1000];
 				out.write(heartbeat);
-				System.out.println("send heartbeat to server...and handle server's response");
+				System.out.println("send value:"+heartbeat);
+				System.out.println("send heartbeat to server...");
+				//System.out.println("send heartbeat to server...and handle server's response");
 
+				in.read(response,0,response.length);
+				System.out.println("response value:"+response);
+				/*
 				// 4-bytes number
 				in.read(response, 0, 4);
 				int length = Integer.parseInt(new String(response).trim());
@@ -72,6 +82,7 @@ class HeartbeatTimerTask extends Thread {
 					}
 					//System.out.println("");
 				}
+				*/
 
 				Thread.sleep(1000);
 			}

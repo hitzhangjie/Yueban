@@ -66,8 +66,6 @@ class Client {
 
 			// add a thread to recv event from server and handle event
 
-
-
 		}
 		catch (Exception e) {
 			e.printStackTrace();
