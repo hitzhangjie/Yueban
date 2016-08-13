@@ -1,6 +1,9 @@
 package kn.main.server;
 
-import kn.main.common.EventType;
+import kn.main.server.msg_type.DJEventMsg;
+import kn.main.server.msg_type.InteractEventMsg;
+import kn.main.server.msg_type.MusicCtrlEventMsg;
+import kn.main.utils.DataUtil;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -153,20 +156,24 @@ class ServerHandleAppEventThread extends Thread {
 				//while(in.read(buf)>0) {
 				in.read(buf);
 
-				// step 2: judge which event type it is
-				// judge logic
-				/*
-				int evtType = 0;
-				switch (evtType) {
-					case EventType.BULLET_SCREEN_ADD_EVT:
-						// handle it
-						break;
-					// others
-						// handle it
-					default:
-						// ...
+				String rawData = buf.toString();
+				Object obj = DataUtil.decodeAsMsg(rawData);
+				if(obj instanceof DJEventMsg) {
+					DJEventMsg msg = (DJEventMsg)obj;
+					// call your event handler function
 				}
-				*/
+				else if(obj instanceof MusicCtrlEventMsg) {
+					MusicCtrlEventMsg msg = (MusicCtrlEventMsg)obj;
+					// call your event handler function
+				}
+				else if(obj instanceof InteractEventMsg) {
+					InteractEventMsg msg = (InteractEventMsg)obj;
+					// call your event handler function
+				}
+				else {
+					// common events
+					// call your event handler function
+				}
 
 				heartbeat += new String(buf);
 				//}

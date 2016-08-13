@@ -28,7 +28,7 @@ import java.util.*;
  * README.md in details.
  *
  */
-class Server {
+public class Server {
 
 	public ServerSocket listen_socket = null;
 

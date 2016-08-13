@@ -17,7 +17,7 @@ public class EventType {
 	public static final int MUSIC_FORWARD_EVT = 6;
 	public static final int MUSIC_BACKWARD_EVT = 7;
 	public static final int MUSIC_START_EVT = 8;
-	public static final int mUSIC_STOP_EVT = 9;
+	public static final int MUSIC_STOP_EVT = 9;
 	public static final int MUSIC_RESUME_EVT = 10;
 	public static final int MUSIC_INC_VOLUME_EVT = 11;
 	public static final int MUSIC_DEC_VOLUME_EVT = 12;

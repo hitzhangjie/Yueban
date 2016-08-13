@@ -3,8 +3,8 @@
  */
 package kn.main.utils;
 
-import com.sun.media.jfxmedia.control.VideoRenderControl;
 import kn.main.common.EventType;
+import kn.main.server.msg_type.*;
 
 import javax.swing.event.DocumentEvent;
 
@@ -47,7 +47,17 @@ public class DataUtil {
 			case EventType.DJ_LISTEN_FOLLOW_EVT:
 			case EventType.DJ_LISTEN_UNFOLLOW_EVT:
 				// extract the playload and decode it as Msg, for example, decode it as DJEventMsg
-				res = decodeAsDJEventMSG(evtType_i, rawData.substring(2, rawData.length()-2));
+				res = decodeAsDJEventMsg(evtType_i, rawData.substring(2, rawData.length()-2));
+				break;
+			case EventType.MUSIC_START_EVT:
+			case EventType.MUSIC_STOP_EVT:
+			case EventType.MUSIC_RESUME_EVT:
+			case EventType.MUSIC_SWITCH_NEXT_EVT:
+			case EventType.MUSIC_SWITCH_PREV_EVT:
+				// extract the playload and decode it as Msg, for example, decode it as DJEventMsg
+				res = decodeAsMusicCtrlMsg(evtType_i, rawData.substring(2, rawData.length()-2));
+				break;
+			default:
 				break;
 		}
 
@@ -55,7 +65,7 @@ public class DataUtil {
 	}
 
 	// 已经确定事件类型为DJ相关的事件，该事件可以继续细分，根据细分后的类型进一步确定数据项
-	private static DJEventMsg decodeAsDJEventMSG(Integer evtType, String payload) {
+	private static DJEventMsg decodeAsDJEventMsg(Integer evtType, String payload) {
 
 		DJEventMsg msg = new DJEventMsg();
 		msg.setEvent(evtType);
@@ -71,7 +81,9 @@ public class DataUtil {
 		// 2. both dj_uid and dj_follower_uid are reported
 		//    - dj_listen_follow_evt
 		//    - dj_listen_unfollow_evt
-		else if(evtType==EventType.DJ_LISTEN_FOLLOW_EVT || evtType==EventType.DJ_LISTEN_UNFOLLOW_EVT) {
+		else if(evtType==EventType.DJ_LISTEN_FOLLOW_EVT
+				|| evtType==EventType.DJ_LISTEN_UNFOLLOW_EVT) {
+
 			String [] uids = payload.split("|");
 			int dj_uid = Integer.parseInt(uids[0]);
 			int dj_follower_uid = Integer.parseInt(uids[1]);
@@ -81,71 +93,42 @@ public class DataUtil {
 
 		return msg;
 	}
-}
 
-/**
- * DJ事件消息
- *
- * @see kn.main.common.EventType
- */
-class DJEventMsg {
+	// 已经确定事件类型为MusicCtrl相关的事件，该事件可以继续细分，根据细分后的类型进一步确定数据项
+	private static MusicCtrlEventMsg decodeAsMusicCtrlMsg(Integer evtType, String payload) {
+		MusicCtrlEventMsg msg = new MusicCtrlEventMsg();
+		msg.setEvent(evtType);
 
-	// 上报的事件类型
-	private int event;
-	// dj的uid
-	private int dj_uid;
-	// dj跟随者的uid
-	private int dj_follower_uid;
+		// according to value of `evtType`, prepare the data field `dj_uid`,`dj_follower uid`
+		// 1. only dj_uid is reported
+		//    - music_stop_evt
+		//    - music_resume_evt
+		if(evtType==EventType.MUSIC_STOP_EVT || evtType==EventType.MUSIC_RESUME_EVT) {
+			int dj_uid = Integer.parseInt(payload);
+			msg.setDj_uid(dj_uid);
+		}
+		// 2. both dj_uid and song_id is reported
+		//    - music_start_evt
+		//    - music_switch_next_evt
+		//    - music_switch_prev_evt
+		if(evtType==EventType.MUSIC_START_EVT
+				|| evtType==EventType.MUSIC_SWITCH_NEXT_EVT
+				|| evtType==EventType.MUSIC_SWITCH_PREV_EVT) {
 
-	// getters & setters
-	public int getEvent() {
-		return event;
-	}
+			String [] uids = payload.split("|");
+			int dj_uid = Integer.parseInt(uids[0]);
+			int song_id = Integer.parseInt(uids[1]);
+			msg.setDj_uid(dj_uid);
+			msg.setSong_id(song_id);
+		}
 
-	public void setEvent(int event) {
-		this.event = event;
-	}
-
-	public int getDj_uid() {
-		return dj_uid;
-	}
-
-	public void setDj_uid(int dj_uid) {
-		this.dj_uid = dj_uid;
-	}
-
-	public int getDj_follower_uid() {
-		return dj_follower_uid;
-	}
-
-	public void setDj_follower_uid(int dj_follower_uid) {
-		this.dj_follower_uid = dj_follower_uid;
+		return msg;
 	}
 }
 
-/**
- * 音乐控制事件消息
- *
- * @see kn.main.common.EventType
- */
-class MusicCtrlEventMsg {
 
-}
 
-/**
- * dj、跟随者交互事件消息
- *
- * @see kn.main.common.EventType
- */
-class InteractEventMsg {
 
-}
 
-/**
- * 其他通用事件消息，例如歌单的创建、歌曲的添加等等
- *
- * @see kn.main.common.EventType
- */
-class CommonEventMsg {
 
-}
+
