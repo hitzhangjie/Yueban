@@ -43,7 +43,6 @@ public class Server {
 	// store uin Socket test
 	public static HashMap<Integer, Socket> uinSocketMap = null;
 
-
 	// lock
 	public static String LOCK = "MUTEX";
 	public static final String LOCK_DJ = "MUTEX_DJ";
@@ -59,7 +58,6 @@ public class Server {
 		server.run();
 	}
 
-	// server entry
 	public void run() {
 
 		try {
