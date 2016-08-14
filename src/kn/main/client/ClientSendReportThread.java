@@ -41,7 +41,7 @@ class ClientSendReportThread extends Thread {
 
 			while (true) {
 
-				if (isInDJStartMode) {
+				if (!isInDJStartMode) {
 					String event = String.format("%02d", EventType.DJ_SHARE_START_EVT);
 					String payload = "1194606858";
 					String endflag = "@@";
