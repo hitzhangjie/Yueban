@@ -6,6 +6,8 @@ package kn.main.utils;
 import kn.main.common.EventType;
 import kn.main.server.msg_type.*;
 
+import java.util.Date;
+
 /**
  * Created by zhangjie on 8/13/16.
  */
@@ -31,13 +33,21 @@ public class DataUtil {
 	 */
 	public static Object decodeAsMsg(String rawData) throws Exception {
 
+		System.out.println("get value:"+rawData);
+
 		if(rawData==null) {
 			throw new Exception("you're decoding invalid data ... check and try again");
 		}
 
 		Object res = null;
 		String evtType_s = String.valueOf(rawData.charAt(0))+String.valueOf(rawData.charAt(1));
-		Integer evtType_i = Integer.parseInt(evtType_s);
+		Integer evtType_i = null;
+		try {
+			evtType_i = Integer.parseInt(evtType_s);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 
 		switch(evtType_i) {
 			case EventType.DJ_SHARE_START_EVT:
@@ -52,8 +62,12 @@ public class DataUtil {
 			case EventType.MUSIC_RESUME_EVT:
 			case EventType.MUSIC_SWITCH_NEXT_EVT:
 			case EventType.MUSIC_SWITCH_PREV_EVT:
-				// extract the playload and decode it as Msg, for example, decode it as DJEventMsg
+				// extract the playload and decode it as Msg, for example, decode it as MusicCtrlMsg
 				res = decodeAsMusicCtrlMsg(evtType_i, rawData.substring(2, rawData.length()-2));
+				break;
+			case EventType.HEARTBEAT_EVENT:
+				// extract the playload and decode it as Msg, for example, decode it as HeartbeatMsg
+				res = decodeAsHeartbeatMsg(rawData.substring(2, rawData.length()-2));
 				break;
 			default:
 				break;
@@ -119,6 +133,26 @@ public class DataUtil {
 			msg.setDj_uid(dj_uid);
 			msg.setSong_id(song_id);
 		}
+
+		return msg;
+	}
+
+	// 已经确定事件类型为HeartbeatEvent相关的事件，该事件无需进行细分，直接构造echoMsg即可
+	private static HeartbeatMsg decodeAsHeartbeatMsg(String payload) {
+
+		HeartbeatMsg msg = new HeartbeatMsg();
+
+		String [] parts = payload.split("]");
+		String dtime_client = parts[0].substring(1);
+		String msg_client = parts[1].substring(1);
+
+		String event = String.valueOf(EventType.HEARTBEAT_EVENT);
+		String dtime_now = new Date().toString();
+		String end_flag = "@@";
+		String msg_server = "OK, I know you, you stupid client";
+		String echoMsg = event+"["+dtime_now+"] "+msg_server+end_flag;
+
+		msg.setEchoMsg(echoMsg);
 
 		return msg;
 	}

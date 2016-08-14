@@ -1,11 +1,15 @@
 package kn.main.server;
 
+import kn.main.server.event_type.HandleHeartbeatEvent;
 import kn.main.server.msg_type.DJEventMsg;
+import kn.main.server.msg_type.HeartbeatMsg;
 import kn.main.server.msg_type.InteractEventMsg;
 import kn.main.server.msg_type.MusicCtrlEventMsg;
 import kn.main.utils.DataUtil;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -126,6 +130,7 @@ class ServerHandleAppEventThread extends Thread {
 		try {
 			System.out.println(s);
 			out.write(s.getBytes());
+			out.flush();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -144,19 +149,17 @@ class ServerHandleAppEventThread extends Thread {
 				return;
 			}
 
+			InputStreamReader reader = new InputStreamReader(in);
+
 			while(!connSocket.isClosed()) {
 
-				System.out.println("Thread "+Thread.currentThread().getId()+" waiting ...");
-
-				byte [] buf = new byte[100];
-				String heartbeat = "";
+				char [] buf = new char[1000];
 
 				// step 1: read reported events from iOS\Android App
-				//while(in.read(buf)>=0)
-				//while(in.read(buf)>0) {
-				in.read(buf);
+				reader.read(buf);
+				String rawData = new String(buf);
+				System.out.println("server get value: "+rawData);
 
-				String rawData = buf.toString();
 				Object obj = DataUtil.decodeAsMsg(rawData);
 				if(obj instanceof DJEventMsg) {
 					DJEventMsg msg = (DJEventMsg)obj;
@@ -170,34 +173,15 @@ class ServerHandleAppEventThread extends Thread {
 					InteractEventMsg msg = (InteractEventMsg)obj;
 					// call your event handler function
 				}
+				else if(obj instanceof HeartbeatMsg) {
+					// call following handler function
+					HeartbeatMsg msg = (HeartbeatMsg)obj;
+					HandleHeartbeatEvent.handleEvent(msg, connSocket);
+				}
 				else {
 					// common events
 					// call your event handler function
 				}
-
-				heartbeat += new String(buf);
-				//}
-
-				// ack heartbeat
-				String msg = "Server Side Thread "+Thread.currentThread().getId()
-						+" ACK your heartbeat: \""+heartbeat+"\"";
-				write(msg, out);
-
-				// client address
-				SocketAddress remoteAddress = connSocket.getRemoteSocketAddress();
-				//msg = "Server Side Thread "+Thread.currentThread().getId()
-				//			+" client ip:"
-				//			+((InetSocketAddress)remoteAddress).getAddress().toString();
-				//write(msg, out);
-
-				// other clients' address info
-				msg = getClientsAddrInfo(remoteAddress);
-				msg = "Server Side Thread "+Thread.currentThread().getId()
-						+" Send all clients\' info: to Client["
-						+((InetSocketAddress)remoteAddress).getAddress().toString()+"]";
-				write(msg, out);
-				msg = "["+new Date().toString()+"] CLIENTSADDR:"+msg;
-				System.out.println(msg);
 
 				Thread.sleep(1000);
 			}
@@ -205,6 +189,5 @@ class ServerHandleAppEventThread extends Thread {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 }
