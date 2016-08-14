@@ -2,9 +2,11 @@
  * Yueban client
  *
  * @author zhangjie
- * @date   2016-08-07 09:40:40 PM
+ * @date 2016-08-07 09:40:40 PM
  */
 package kn.main.client;
+
+import sun.plugin2.main.server.HeartbeatThread;
 
 import java.lang.*;
 import java.net.*;
@@ -12,6 +14,7 @@ import java.io.*;
 import java.util.*;
 
 class Client {
+	public boolean isHooked = false;
 
 	public Socket conn_socket = null;
 
@@ -50,7 +53,7 @@ class Client {
 	public void run() {
 
 		// if ip/port is not valid, exit the program
-		if(!isValidIpAddress(server_ip) || !isValidPort(server_port)) {
+		if (!isValidIpAddress(server_ip) || !isValidPort(server_port)) {
 			usage();
 			return;
 		}
@@ -66,8 +69,22 @@ class Client {
 
 			// add a thread to recv event from server and handle event
 
-		}
-		catch (Exception e) {
+			/*
+			if (!isHooked) {
+				Runtime.getRuntime().addShutdownHook(new Thread() {
+					public void run() {
+						try {
+							HeartbeatTimerTask.connSocket.close();
+							System.out.println("Client has closed the connected socket");
+						} catch (IOException e) {
+							e.printStackTrace();
+							System.out.println("Client cannot close the connected socket");
+						}
+					}
+				});
+			}
+			*/
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -82,31 +99,30 @@ class Client {
 
 	/**
 	 * check whether the parameter is a valid ip address
+	 *
 	 * @param ip ip input
 	 * @return return true if ip is valid, otherwise false
 	 */
 	public static boolean isValidIpAddress(String ip) {
 
-		if(ip==null || ip.length()==0)
+		if (ip == null || ip.length() == 0)
 			return false;
 
-		String [] dottedNums = ip.split("\\.");
+		String[] dottedNums = ip.split("\\.");
 
-		if(dottedNums.length==4) {
-			for(String num_s : dottedNums) {
+		if (dottedNums.length == 4) {
+			for (String num_s : dottedNums) {
 				try {
 					int num_i = Integer.parseInt(num_s);
-					if(num_i>=0 && num_i<=255)
+					if (num_i >= 0 && num_i <= 255)
 						continue;
 					else
 						return false;
-				}
-				catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					return false;
 				}
 			}
-		}
-		else
+		} else
 			return false;
 
 		return true;
@@ -120,25 +136,23 @@ class Client {
 	 */
 	public static boolean isValidPort(String port) {
 
-		if(port==null || port.length()==0)
+		if (port == null || port.length() == 0)
 			return false;
 
 		try {
 			int port_i = Integer.parseInt(port);
-			if(port_i>=1 && port_i<=65535)
+			if (port_i >= 1 && port_i <= 65535)
 				return true;
 			else
 				return false;
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return false;
 		}
 	}
 
-	public static void main (String [] args)
-	{
+	public static void main(String[] args) {
 		// invalid parameters
-		if(args.length!=2) {
+		if (args.length != 2) {
 			usage();
 			return;
 		}

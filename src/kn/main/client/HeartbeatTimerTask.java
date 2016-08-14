@@ -11,7 +11,7 @@ import java.util.Date;
  */
 class HeartbeatTimerTask extends Thread {
 
-	public Socket connSocket = null;
+	public static Socket connSocket = null;
 
 	public OutputStream out = null;
 	public InputStream in = null;
@@ -37,7 +37,6 @@ class HeartbeatTimerTask extends Thread {
 			return;
 
 		try {
-
 			InputStreamReader reader = new InputStreamReader(in);
 			while (!connSocket.isClosed()) {
 

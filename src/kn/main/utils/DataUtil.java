@@ -33,13 +33,19 @@ public class DataUtil {
 	 */
 	public static Object decodeAsMsg(String rawData) throws Exception {
 
-		System.out.println("get value:"+rawData);
+		if(rawData==null || rawData.length()==0
+				|| !Character.isDigit(rawData.charAt(0))) {
+			throw new Exception("We're decoding invalid data [sent from client] ... check and try again");
+		}
 
-		if(rawData==null) {
-			throw new Exception("you're decoding invalid data ... check and try again");
+		for(char ch : rawData.toCharArray()) {
+			System.out.print(ch);
 		}
 
 		Object res = null;
+		if(rawData.length()<4)
+			return null;
+
 		String evtType_s = String.valueOf(rawData.charAt(0))+String.valueOf(rawData.charAt(1));
 		Integer evtType_i = null;
 		try {
@@ -47,6 +53,7 @@ public class DataUtil {
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 
 		switch(evtType_i) {

@@ -9,6 +9,7 @@ import java.util.ArrayList;
  * ServerCleanClientThread
  *
  * this class is used to clean the offline client
+ * @deprecated
  */
 class ServerCleanClientThread extends Thread {
 

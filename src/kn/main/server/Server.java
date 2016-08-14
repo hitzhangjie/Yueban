@@ -2,10 +2,11 @@
  * Yueban Server
  *
  * @author zhangjie
- * @date   2016-08-07 08:05:58 PM
+ * @date 2016-08-07 08:05:58 PM
  */
 package kn.main.server;
 
+import java.io.IOException;
 import java.lang.*;
 import java.net.*;
 import java.util.*;
@@ -52,8 +53,7 @@ public class Server {
 	// server listen port, hard coded to 20000
 	public int PORT = 20000;
 
-	public static void main (String [] args)
-	{
+	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();
 	}
@@ -61,16 +61,20 @@ public class Server {
 	public void run() {
 
 		try {
-
 			listen_socket = new ServerSocket(PORT);
-			Socket conn_socket = null;
-
-			// 主线程只负责建立连接，并维护客户端的连接信息
-			while((conn_socket=listen_socket.accept())!=null) {
-
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Server cannot create ServerSocket ... exit");
+			System.exit(1);
+		}
+		Socket conn_socket = null;
+		// 主线程只负责建立连接，并维护客户端的连接信息
+		try {
+			while ((conn_socket = listen_socket.accept()) != null) {
+				conn_socket.setSoTimeout(3000);
 				System.out.println("A new Connection is established");
 
-				if(clientsList==null) {
+				if (clientsList == null) {
 					clientsList = new ArrayList<SocketAddress>();
 					socketsList = new ArrayList<Socket>();
 					handleAppEventThreadLists = new ArrayList<ServerHandleAppEventThread>();
@@ -79,7 +83,7 @@ public class Server {
 
 				SocketAddress remoteAddress = conn_socket.getRemoteSocketAddress();
 
-				synchronized(LOCK) {
+				synchronized (LOCK) {
 					// store client' info, including socketaddress and connectsocket
 					clientsList.add(remoteAddress);
 					socketsList.add(conn_socket);
@@ -87,22 +91,33 @@ public class Server {
 
 				// create a new client process thread used to handle client's requests
 				ServerHandleAppEventThread handleAppEventThread = new ServerHandleAppEventThread(conn_socket);
-				synchronized(LOCK) {
+				synchronized (LOCK) {
 					handleAppEventThreadLists.add(handleAppEventThread);
 				}
 				handleAppEventThread.start();
 
 				// clean offline clients
-				if(!cleanClientThread.isAlive())
+				// connSocket.isClosed() can not be used as a rule to judge whether client has disconnected!
+				// so i use the tranferred data's validity as the rule.
+				// cleanClientThread is deprecated!
+				// fixme
+				/*
+				if (!cleanClientThread.isAlive())
 					cleanClientThread.start();
+					*/
 
 				System.out.println("Server is listening ... waiting to be connected");
 
 				Thread.sleep(1000);
 			}
-		}
-		catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("Server cannot listen on this ServerSocket ... exit");
+			System.exit(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			System.out.println("Server receive this Interupt event ... stop");
+			System.exit(0);
 		}
 	}
 }

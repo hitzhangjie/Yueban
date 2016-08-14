@@ -62,11 +62,3 @@ public class DBPool{
     }
 }
 
-//try {
-//    con = DBPool.getInstance().getConnection();
-//}catch (Exception   e){
-//
-//}finally{
-//    if(con != null)
-//        con.close();
-//}

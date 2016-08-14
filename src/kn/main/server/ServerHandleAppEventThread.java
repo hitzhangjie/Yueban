@@ -7,10 +7,7 @@ import kn.main.server.msg_type.InteractEventMsg;
 import kn.main.server.msg_type.MusicCtrlEventMsg;
 import kn.main.utils.DataUtil;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -157,30 +154,50 @@ class ServerHandleAppEventThread extends Thread {
 
 				// step 1: read reported events from iOS\Android App
 				reader.read(buf);
-				String rawData = new String(buf);
+
+				String buf_s = new String(buf);
+				int index = buf_s.indexOf("@@");
+				if(index<0) {
+					System.out.println("invalid data ... kill this connection");
+					connSocket.close();
+					break;
+				}
+
+				String rawData = buf_s.substring(0 ,index+2);
 				System.out.println("server get value: "+rawData);
 
-				Object obj = DataUtil.decodeAsMsg(rawData);
-				if(obj instanceof DJEventMsg) {
-					DJEventMsg msg = (DJEventMsg)obj;
-					// call your event handler function
+				Object obj;
+				try {
+					obj = DataUtil.decodeAsMsg(rawData);
 				}
-				else if(obj instanceof MusicCtrlEventMsg) {
-					MusicCtrlEventMsg msg = (MusicCtrlEventMsg)obj;
-					// call your event handler function
+				catch (Exception e) {
+					e.printStackTrace();
+					return;
 				}
-				else if(obj instanceof InteractEventMsg) {
-					InteractEventMsg msg = (InteractEventMsg)obj;
-					// call your event handler function
-				}
-				else if(obj instanceof HeartbeatMsg) {
-					// call following handler function
-					HeartbeatMsg msg = (HeartbeatMsg)obj;
-					HandleHeartbeatEvent.handleEvent(msg, connSocket);
+
+				if(obj!=null) {
+
+					if (obj instanceof DJEventMsg) {
+						DJEventMsg msg = (DJEventMsg) obj;
+						// call your event handler function
+					} else if (obj instanceof MusicCtrlEventMsg) {
+						MusicCtrlEventMsg msg = (MusicCtrlEventMsg) obj;
+						// call your event handler function
+					} else if (obj instanceof InteractEventMsg) {
+						InteractEventMsg msg = (InteractEventMsg) obj;
+						// call your event handler function
+					} else if (obj instanceof HeartbeatMsg) {
+						// call following handler function
+						HeartbeatMsg msg = (HeartbeatMsg) obj;
+						HandleHeartbeatEvent.handleEvent(msg, connSocket);
+					} else {
+						// common events
+						// call your event handler function
+					}
 				}
 				else {
-					// common events
-					// call your event handler function
+					connSocket.close();
+					break;
 				}
 
 				Thread.sleep(1000);
