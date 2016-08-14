@@ -37,21 +37,20 @@ public class DataUtil {
 			throw new Exception("We're decoding invalid data [sent from client] ... check and try again");
 		}
 
-		for(char ch : rawData.toCharArray()) {
-			System.out.print(ch);
+		Object res = null;
+		if(rawData.length()<4) {
+			System.err.println("msg length<=4");
+			return null;
 		}
 
-		Object res = null;
-		if(rawData.length()<4)
-			return null;
-
-		String evtType_s = String.valueOf(rawData.charAt(0))+String.valueOf(rawData.charAt(1));
+		String evtType_s = rawData.charAt(0)+""+rawData.charAt(1);
 		Integer evtType_i = null;
 		try {
 			evtType_i = Integer.parseInt(evtType_s);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+			System.out.println("event_type is wrong");
 			return null;
 		}
 
@@ -61,7 +60,7 @@ public class DataUtil {
 			case EventType.DJ_LISTEN_FOLLOW_EVT:
 			case EventType.DJ_LISTEN_UNFOLLOW_EVT:
 				// extract the playload and decode it as Msg, for example, decode it as DJEventMsg
-				res = decodeAsDJEventMsg(evtType_i, rawData.substring(2, rawData.length()-2));
+				res = decodeAsDJEventMsg(evtType_i, rawData.substring(2, rawData.indexOf("@@")));
 				break;
 			case EventType.MUSIC_START_EVT:
 			case EventType.MUSIC_STOP_EVT:
@@ -69,11 +68,11 @@ public class DataUtil {
 			case EventType.MUSIC_SWITCH_NEXT_EVT:
 			case EventType.MUSIC_SWITCH_PREV_EVT:
 				// extract the playload and decode it as Msg, for example, decode it as MusicCtrlMsg
-				res = decodeAsMusicCtrlMsg(evtType_i, rawData.substring(2, rawData.length()-2));
+				res = decodeAsMusicCtrlMsg(evtType_i, rawData.substring(2, rawData.indexOf("@@")));
 				break;
 			case EventType.HEARTBEAT_EVENT:
 				// extract the playload and decode it as Msg, for example, decode it as HeartbeatMsg
-				res = decodeAsHeartbeatMsg(rawData.substring(2, rawData.length()-2));
+				res = decodeAsHeartbeatMsg(rawData.substring(2, rawData.indexOf("@@")));
 				break;
 			default:
 				break;
@@ -174,6 +173,7 @@ public class DataUtil {
 		// check end_flag's position
 		int index = data.indexOf("@@");
 		if(index<0) {
+			System.out.println("index=="+index);
 			return false;
 		}
 
@@ -184,14 +184,17 @@ public class DataUtil {
 		if(Character.isDigit(digit_1) && Character.isDigit(digit_2)) {
 			int event = Integer.parseInt(""+digit_1+digit_2);
 			if( !((event>=0 && event<=20) || event==99) ) {
+				System.out.println("event=="+event);
 				return false;
 			}
 		}
 
 		// check payload's validity
 		String payload = data.substring(2, index);
-		if(payload==null || payload.length()==0)
+		if(payload==null || payload.length()==0) {
+			System.out.println("payload=="+payload);
 			return false;
+		}
 
 		return true;
 	}

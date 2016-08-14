@@ -22,8 +22,10 @@ public class HandleHeartbeatEvent {
 		OutputStreamWriter writer = new OutputStreamWriter(connSocket.getOutputStream());
 		String echoMsg = hbMsg.getEchoMsg();
 
-		writer.write(echoMsg);
-		writer.flush();
+		//synchronized (connSocket) {
+			writer.write(echoMsg);
+			writer.flush();
+		//}
 		System.out.println("server send value:"+echoMsg);
 	}
 }

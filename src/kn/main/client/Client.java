@@ -14,35 +14,18 @@ import java.io.*;
 import java.util.*;
 
 class Client {
-	public boolean isHooked = false;
-
-	public Socket conn_socket = null;
+	public static Socket connSocket = null;
 
 	public String server_ip = null;
 	public String server_port = null;
 
-	// indicate os on which this program runs
-	//public static String client_os = null;
-
 	// store other clients' ip address
 	public static ArrayList<String> neighboursList = null;
 
-	/**
-	 *
-	 */
 	public Client(String ip, String port) {
 
 		this.server_ip = ip;
 		this.server_port = port;
-
-		/*
-		Properties props = System.getProperties();
-		String osname = props.getProperty("os.name").toLowerCase();
-		if(osname.contains("windows"))
-			this.client_os = "win";
-		else if(osname.contains("linux"))
-			this.client_os = "linux";
-		*/
 
 		this.neighboursList = new ArrayList<String>();
 	}
@@ -60,30 +43,16 @@ class Client {
 
 		// ready to work
 		try {
-			conn_socket = new Socket(server_ip, Integer.parseInt(server_port));
+			connSocket = new Socket(server_ip, Integer.parseInt(server_port));
 
 			// send heartbeat to the server
-			new HeartbeatTimerTask(conn_socket).start();
+			new HeartbeatTimerTask(connSocket).start();
+			new ClientSendReportThread(connSocket).start();
 
 			// add a thread to send event to server
 
 			// add a thread to recv event from server and handle event
 
-			/*
-			if (!isHooked) {
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					public void run() {
-						try {
-							HeartbeatTimerTask.connSocket.close();
-							System.out.println("Client has closed the connected socket");
-						} catch (IOException e) {
-							e.printStackTrace();
-							System.out.println("Client cannot close the connected socket");
-						}
-					}
-				});
-			}
-			*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

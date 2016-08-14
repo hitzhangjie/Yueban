@@ -44,10 +44,14 @@ class HeartbeatTimerTask extends Thread {
 				String end_flag = "@@";
 				String dtime = new Date().toString();
 				String heartbeat = event + "[" + dtime + "] hello server!" + end_flag;
-
+				int len = heartbeat.length();
+				String len_s = String.format("%04d", len);
+				heartbeat = len_s + heartbeat;
 				OutputStreamWriter writer = new OutputStreamWriter(out);
-				writer.write(heartbeat);
-				writer.flush();
+				//synchronized (Client.connSocket) {
+					writer.write(heartbeat);
+					writer.flush();
+				//}
 				System.out.println("send value to server: " + heartbeat);
 
 				char[] response = new char[1000];
