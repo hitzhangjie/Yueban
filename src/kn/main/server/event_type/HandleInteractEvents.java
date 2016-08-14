@@ -3,12 +3,16 @@ package kn.main.server.event_type;
 import kn.main.common.EventType;
 import kn.main.server.msg_type.InteractEventMsg;
 import kn.main.server.Server;
+
+import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import kn.main.dao.utils.DBPool;
+import java.net.Socket;
 
 /**
  * Created by zhangjie on 8/13/16.
@@ -46,14 +50,25 @@ public class HandleInteractEvents {
     //处理送鲜花事件
     public int handleLikeEvent(InteractEventMsg interactEvents) throws Exception{
         LinkedList<Integer> djFollows = null;
+
         synchronized(Server.LOCK_DJ){
             djFollows = Server.djFollowersMap.get(interactEvents.getDjID());
         }
 
         //遍历跟随者同步送鲜花
+        Socket cur_socket = null;
         for(Iterator<Integer>iter = djFollows.iterator(); iter.hasNext();){
             if(iter.next().equals(interactEvents.getuID())){
-
+                synchronized(Server.LOCK_DJ) {
+                    cur_socket = Server.uinSocketMap.get(interactEvents.getuID());
+                }
+                String event = String.valueOf(EventType.LIKE_EVT);
+                String end_flag = "@@";
+                String likeevent = event +  end_flag;
+                OutputStreamWriter writer = new OutputStreamWriter(cur_socket.getOutputStream());
+                writer.write(likeevent);
+                writer.flush();
+                writer.close();
             }
         }
 
@@ -73,6 +88,11 @@ public class HandleInteractEvents {
         PreparedStatement statUpdate = con.prepareStatement(sql);
         statUpdate.setInt(1,userPraisedCount);
         statUpdate.setInt(2,interactEvents.getDjID());
+        int i = statUpdate.executeUpdate();
+        if (i != 1){
+            //失败
+        }
+        DBPool.closeConnection(con);
         return 0;
     }
 
@@ -84,9 +104,19 @@ public class HandleInteractEvents {
         }
 
         //遍历跟随者同步丢板鞋
+        Socket cur_socket = null;
         for(Iterator<Integer>iter = djFollows.iterator(); iter.hasNext();){
             if(iter.next().equals(interactEvents.getuID())){
-
+                synchronized(Server.LOCK_DJ) {
+                    cur_socket = Server.uinSocketMap.get(interactEvents.getuID());
+                }
+                String event = String.valueOf(EventType.DISLIKE_EVT);
+                String end_flag = "@@";
+                String dislikeevent = event +  end_flag;
+                OutputStreamWriter writer = new OutputStreamWriter(cur_socket.getOutputStream());
+                writer.write(dislikeevent);
+                writer.flush();
+                writer.close();
             }
         }
 
@@ -106,6 +136,11 @@ public class HandleInteractEvents {
         PreparedStatement statUpdate = con.prepareStatement(sql);
         statUpdate.setInt(1,userCriticizedCount);
         statUpdate.setInt(2,interactEvents.getDjID());
+        int i = statUpdate.executeUpdate();
+        if (i != 1){
+            //失败
+        }
+        DBPool.closeConnection(con);
         return 0;
     }
 
