@@ -79,6 +79,8 @@ class ServerHandleAppEventThread extends Thread {
 				return;
 			}
 
+			System.out.println("conn info:"+connSocket.hashCode());
+
 			while (!connSocket.isClosed()) {
 				char[] buf = new char[1024];
 

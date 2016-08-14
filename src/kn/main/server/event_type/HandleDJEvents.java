@@ -63,7 +63,7 @@ public class HandleDJEvents {
 			// in java, assignment a class object to another is just to pass the `reference value`,
 			// so, using following code cannot avoid the race condition.
 			/*
-		    synchronized (Server.LOCK){
+			synchronized (Server.LOCK){
                 sockets = Server.socketsList;
             }
             */
@@ -103,7 +103,7 @@ public class HandleDJEvents {
 		}
 		if (status == 0) {
 			//TODO:  push to all sockets, dj end
-	        /*
+		    /*
             synchronized (Server.LOCK){
                 sockets = Server.socketsList;
             }
@@ -138,6 +138,23 @@ public class HandleDJEvents {
 				System.out.println("Dj finished  DJ_UIN:" + event.getDj_uid());
 			} else {
 				Server.djFollowersMap.get(event.getDj_uid()).add(event.getDj_follower_uid());
+				// fixme
+				// follow一个dj之后，这个事件消息应该被push到同房间中的其他用户，以便他们刷新ui，
+				// 或者执行一些其他的处理，比如更新当前房间中的总人数等
+				FollowDJMsg msg = new FollowDJMsg(
+						event.getEvent(), event.getDj_uid(), event.getDj_follower_uid());
+				String data = msg.encodeToString();
+				synchronized (Server.LOCK_DJ) {
+					if(Server.djFollowersMap!=null) {
+						LinkedList<Integer> friendsInRoom = Server.djFollowersMap.get(event.getDj_uid());
+						if(friendsInRoom!=null) {
+							for(Integer followerUin : friendsInRoom) {
+
+							}
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -200,11 +217,11 @@ class DjStopMsg {
 		String event = String.format("%02d", eventType);
 		String endflag = "@@";
 		// delimiter '|' only exists between data items, for example, it's between djUin and djFollowerUin
-		String msg = event+ djUin + endflag;
+		String msg = event + djUin + endflag;
 		int len = msg.length();
 		// 4 chars, standing for length field in protocol message
 		String len_s = String.format("%04d", len);
-		msg = len_s+msg;
+		msg = len_s + msg;
 
 		return msg;
 	}
@@ -213,4 +230,29 @@ class DjStopMsg {
 	private int djUin;
 }
 
+class FollowDJMsg {
 
+	private int eventType;
+	private int djUin;
+	private int djFollowerUin;
+
+	public FollowDJMsg(int eventType, int djUin, int djFollowerUin) {
+		this.eventType = eventType;
+		this.djUin = djUin;
+		this.djFollowerUin = djFollowerUin;
+	}
+
+	public String encodeToString() {
+
+		String event = String.format("%02d", eventType);
+		String endflag = "@@";
+		String delimiter = "|";
+
+		String msg = event + djUin + delimiter + djFollowerUin + endflag;
+		int len = msg.length();
+		String len_s = String.format("%04d", len);
+		msg = len_s + msg;
+
+		return msg;
+	}
+}
