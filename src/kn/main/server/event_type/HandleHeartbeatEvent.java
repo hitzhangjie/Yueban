@@ -5,6 +5,8 @@ import kn.main.server.msg_type.HeartbeatMsg;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -17,10 +19,11 @@ public class HandleHeartbeatEvent {
 
 	public static void handleEvent(HeartbeatMsg hbMsg, Socket connSocket) throws IOException {
 
-		OutputStream out = connSocket.getOutputStream();
+		OutputStreamWriter writer = new OutputStreamWriter(connSocket.getOutputStream());
 		String echoMsg = hbMsg.getEchoMsg();
 
-		out.write(echoMsg.getBytes());
-		System.out.println(echoMsg);
+		writer.write(echoMsg);
+		writer.flush();
+		System.out.println("server send value:"+echoMsg);
 	}
 }

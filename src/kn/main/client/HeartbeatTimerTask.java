@@ -2,8 +2,7 @@ package kn.main.client;
 
 import kn.main.common.EventType;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Date;
 
@@ -21,73 +20,44 @@ class HeartbeatTimerTask extends Thread {
 
 		this.connSocket = connSocket;
 
-		if(connSocket!=null) {
+		if (connSocket != null) {
 			try {
 				this.out = connSocket.getOutputStream();
 				this.in = connSocket.getInputStream();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
 	}
 
-	public void run () {
+	public void run() {
 
-		if(connSocket==null)
+		if (connSocket == null)
 			return;
 
 		try {
 
-			while(!connSocket.isClosed()) {
+			InputStreamReader reader = new InputStreamReader(in);
+			while (!connSocket.isClosed()) {
 
 				String event = String.valueOf(EventType.HEARTBEAT_EVENT);
 				String end_flag = "@@";
 				String dtime = new Date().toString();
-				byte [] heartbeat = (event + "["+dtime+"] hello server!" + end_flag).getBytes();
-				byte [] response = new byte[1000];
-				out.write(heartbeat);
-				System.out.println("send value:"+heartbeat);
-				System.out.println("send heartbeat to server...");
-				//System.out.println("send heartbeat to server...and handle server's response");
+				String heartbeat = event + "[" + dtime + "] hello server!" + end_flag;
 
-				in.read(response,0,response.length);
-				System.out.println("response value:"+response);
-				/*
-				// 4-bytes number
-				in.read(response, 0, 4);
-				int length = Integer.parseInt(new String(response).trim());
+				OutputStreamWriter writer = new OutputStreamWriter(out);
+				writer.write(heartbeat);
+				writer.flush();
+				System.out.println("send value to server: " + heartbeat);
 
-				String body = "";
-				while(length>0) {
-					System.out.println("keep reading ...");
-					length -= in.read(response, 0, length);
-					body += new String(response);
-				}
-				System.out.println("done");
-				body = body.trim();
-				System.out.println(body);
-
-				// parse the body part to extract the other clients' addresses
-				// into neighboursList
-				if(body.contains("CLIENTSADDR:")) {
-					String body_tmp = body.substring(body.indexOf("/"));
-					String [] ip_tmp = body_tmp.split(";");
-
-					Client.neighboursList.clear();
-					for(String client : ip_tmp) {
-						Client.neighboursList.add(client.split(":")[0].substring(1));
-						//System.out.print(Client.neighboursList.get(Client.neighboursList.size()-1)+" ");
-					}
-					//System.out.println("");
-				}
-				*/
+				char[] response = new char[1000];
+				reader.read(response);
+				System.out.println("get value from server: " + new String(response));
 
 				Thread.sleep(1000);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
