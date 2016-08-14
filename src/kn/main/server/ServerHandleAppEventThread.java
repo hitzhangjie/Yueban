@@ -48,8 +48,8 @@ class ServerHandleAppEventThread extends Thread {
 
 	public Socket connSocket = null;
 
-	public InputStream in = null;
-	public OutputStream out = null;
+	public InputStreamReader reader = null;
+	public OutputStreamWriter writer = null;
 
 	public ServerHandleAppEventThread(Socket connSocket) {
 
@@ -58,8 +58,10 @@ class ServerHandleAppEventThread extends Thread {
 		if(connSocket!=null) {
 
 			try {
-				in = connSocket.getInputStream();
-				out = connSocket.getOutputStream();
+				InputStream in = connSocket.getInputStream();
+				OutputStream out = connSocket.getOutputStream();
+				reader = new InputStreamReader(in);
+				writer = new OutputStreamWriter(out);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -74,40 +76,26 @@ class ServerHandleAppEventThread extends Thread {
 
 		try {
 			if(connSocket==null) {
-
-				System.out.println("Socket is invalid");
+				System.out.println("Connected socket is invalid ... exit");
+				connSocket.close();
 				return;
 			}
 
-			InputStreamReader reader = new InputStreamReader(in);
-
 			while(!connSocket.isClosed()) {
-
 				char [] buf = new char[1000];
 
 				// step 1: read reported events from iOS\Android App
 				reader.read(buf);
-
 				String buf_s = new String(buf);
-				int index = buf_s.indexOf("@@");
-				if(index<0) {
+				// check data's validity
+				if(!DataUtil.isValidData(buf_s)) {
 					System.out.println("invalid data ... kill this connection");
 					connSocket.close();
 					break;
 				}
+				System.out.println("server get value: "+buf_s);
 
-				String rawData = buf_s.substring(0 ,index+2);
-				System.out.println("server get value: "+rawData);
-
-				Object obj;
-				try {
-					obj = DataUtil.decodeAsMsg(rawData);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					return;
-				}
-
+				Object obj = DataUtil.decodeAsMsg(buf_s);
 				if(obj!=null) {
 
 					if (obj instanceof DJEventMsg) {

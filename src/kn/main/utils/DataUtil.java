@@ -33,8 +33,7 @@ public class DataUtil {
 	 */
 	public static Object decodeAsMsg(String rawData) throws Exception {
 
-		if(rawData==null || rawData.length()==0
-				|| !Character.isDigit(rawData.charAt(0))) {
+		if(!isValidData(rawData)) {
 			throw new Exception("We're decoding invalid data [sent from client] ... check and try again");
 		}
 
@@ -162,6 +161,39 @@ public class DataUtil {
 		msg.setEchoMsg(echoMsg);
 
 		return msg;
+	}
+
+	/**
+	 * 检查数据的有效性
+	 *
+	 * @param data
+	 * @return
+	 */
+	public static boolean isValidData(String data) {
+
+		// check end_flag's position
+		int index = data.indexOf("@@");
+		if(index<0) {
+			return false;
+		}
+
+		// check event_type's validity
+		char digit_1 = data.charAt(0);
+		char digit_2 = data.charAt(2);
+
+		if(Character.isDigit(digit_1) && Character.isDigit(digit_2)) {
+			int event = Integer.parseInt(""+digit_1+digit_2);
+			if( !((event>=0 && event<=20) || event==99) ) {
+				return false;
+			}
+		}
+
+		// check payload's validity
+		String payload = data.substring(2, index);
+		if(payload==null || payload.length()==0)
+			return false;
+
+		return true;
 	}
 
 }
