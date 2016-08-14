@@ -20,7 +20,7 @@ public class DBPool{
         try {
             dataSource = new ComboPooledDataSource();
             dataSource.setUser( "root");
-            dataSource.setPassword( "mm4477MMT");
+            dataSource.setPassword( "root");
             dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/yuebandb?"
                     + "autoReconnect=true&useUnicode=true&characterEncoding=UTF8");
             dataSource.setDriverClass( "com.mysql.jdbc.Driver ");
