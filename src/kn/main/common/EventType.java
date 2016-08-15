@@ -36,6 +36,9 @@ public class EventType {
 
 	// 歌单创建相关的事件
 	// ...
+	public static final int MUSIC_RECORD_CREATE_EVT = 21;
+	public static final int MUSIC_RECORD_PULL_EVT = 22;
+	public static final int MUSIC_ALL_PULL_EVT    = 23;
 
 
 	//
